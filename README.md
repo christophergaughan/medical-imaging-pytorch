@@ -112,7 +112,7 @@ pip install torch torchvision pytorch-lightning nibabel pydicom albumentations n
 ## Author
 
 Christopher Gaughan, PhD  
-[AntibodyML Consulting LLC](https://github.com/christophergaughan)
+https://github.com/christophergaughan
 
 ---
 
