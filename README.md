@@ -1,17 +1,17 @@
 # Medical Imaging with PyTorch
 
-End-to-end deep learning pipelines for medical image analysis — from preprocessing to deployment-ready models.
+End-to-end deep learning pipelines for medical image analysis — from preprocessing to production-ready segmentation models.
 
 ## Overview
 
-This repository demonstrates practical medical imaging workflows covering different modalities, tasks, and clinical applications.
+This repository demonstrates practical medical imaging workflows covering different modalities, tasks, and clinical applications. Built with PyTorch and PyTorch Lightning on Google Colab.
 
-| Notebook | Task | Modality | Key Techniques |
-|----------|------|----------|----------------|
-| `03-Preprocessing-Enhanced` | Image preprocessing | Brain MRI, Lung CT, Cardiac MRI (NIfTI) | Affine matrices, orientation, CT vs MRI normalization |
-| `04-Pneumonia-Classification` | Binary classification | Chest X-ray (DICOM) | ResNet18, transfer learning, CAM interpretability |
-| `06-Atrium-Segmentation` | Semantic segmentation | Cardiac MRI (NIfTI) | U-Net, Dice loss, synchronized augmentation |
-| `07-Lung-Tumor-Segmentation` | Semantic segmentation | Chest CT (NIfTI) | U-Net, BCE loss, weighted sampling for class imbalance |
+| Notebook | Task | Modality | Key Techniques | Results |
+|----------|------|----------|----------------|---------|
+| `04-Pneumonia-Classification` | Binary classification | Chest X-ray (DICOM) | ResNet18, transfer learning, CAM | 86% accuracy |
+| `06-Atrium-Segmentation` | 2D Segmentation | Cardiac MRI (NIfTI) | U-Net, Dice loss | ~95% Dice |
+| `07-Lung-Tumor-Segmentation` | 2D Segmentation | Chest CT (NIfTI) | Weighted sampling, BCE loss | ✓ |
+| `08-3D-Liver-Tumor-Segmentation` | **3D Segmentation** | Abdominal CT (NIfTI) | **3D U-Net, TorchIO, multi-class** | **83% Val Dice** |
 
 ---
 
@@ -28,7 +28,7 @@ Binary classifier for detecting pneumonia from chest X-rays.
 
 **Highlights:**
 - DICOM preprocessing pipeline
-- Transfer learning from ImageNet
+- Transfer learning from ImageNet (ResNet18)
 - Data augmentation for medical images
 - Class Activation Maps (CAM) for model interpretability
 
@@ -72,15 +72,51 @@ Segmentation of lung tumors from CT scans — addressing severe class imbalance.
 
 ---
 
+## 3D Liver & Tumor Segmentation ⭐
+
+**The capstone project** — true 3D volumetric segmentation with multi-class output.
+
+**Dataset:** [Medical Segmentation Decathlon - Task03_Liver](http://medicaldecathlon.com/) (resampled to 256×256×Z)
+
+**Clinical relevance:**
+- Liver cancer is the 6th most common cancer worldwide
+- Surgical planning for tumor resection
+- Radiation therapy targeting
+- Liver volumetry for transplant assessment
+
+**What makes this different:**
+
+| Previous Notebooks | This Notebook |
+|-------------------|---------------|
+| 2D convolutions (Conv2d) | 3D convolutions (Conv3d) |
+| Binary segmentation | Multi-class (background/liver/tumor) |
+| Standard augmentation | TorchIO for 3D transforms |
+| Full images | Patch-based training (128³) |
+
+**Highlights:**
+- **3D U-Net** architecture with trilinear upsampling
+- **Combined loss:** Cross-Entropy + Dice
+- **TorchIO** for 3D medical image handling
+- Patch-based training for memory efficiency
+- Mixed precision (float16) on A100 GPU
+
+**Results:**
+- Training Dice: 93.0%
+- Validation Dice: 83.1%
+- Liver Dice: 90.0%
+
+---
+
 ## Technical Stack
 
 ```
 pytorch
 pytorch-lightning
 torchvision
-nibabel          # NIfTI format
-pydicom          # DICOM format
-albumentations   # Augmentation
+torchio           # 3D medical imaging
+nibabel           # NIfTI format
+pydicom           # DICOM format
+albumentations    # 2D augmentation
 numpy
 matplotlib
 ```
@@ -88,32 +124,41 @@ matplotlib
 ## Setup
 
 ```bash
-pip install torch torchvision pytorch-lightning nibabel pydicom albumentations numpy matplotlib
+pip install torch torchvision pytorch-lightning torchio nibabel pydicom albumentations
 ```
 
 ## Key Concepts Covered
 
 | Concept | Where |
 |---------|-------|
-| DICOM vs NIfTI | Preprocessing, Pneumonia vs Atrium/Lung |
-| CT vs MRI normalization | Preprocessing, Lung vs Atrium |
+| DICOM vs NIfTI formats | Pneumonia vs Atrium/Lung/Liver |
+| CT vs MRI normalization | Hounsfield units vs z-score |
 | Transfer learning | Pneumonia (ResNet18) |
-| U-Net architecture | Atrium, Lung Tumor |
-| Dice vs BCE loss | Atrium (Dice), Lung (BCE) |
-| Class imbalance | Lung Tumor (WeightedRandomSampler) |
-| Model interpretability | Pneumonia (CAM) |
-| 3D medical volumes | Atrium, Lung Tumor |
+| U-Net architecture | Atrium, Lung, Liver |
+| 2D vs 3D convolutions | Lung (2D) vs Liver (3D) |
+| Dice vs BCE vs Combined loss | Task-dependent selection |
+| Class imbalance handling | WeightedRandomSampler, Dice loss |
+| Patch-based training | Liver (memory optimization) |
+| Model interpretability | CAM (Pneumonia) |
+
+## Lessons Learned
+
+1. **Data matters more than models** — Preprocessing, augmentation, and class balancing are critical
+2. **Domain knowledge > generic ML** — Understanding Hounsfield units, anatomical priors, and clinical metrics
+3. **Loss function selection is task-dependent** — BCE for tiny objects, Dice for imbalanced segmentation, Combined for multi-class
+4. **3D is expensive** — Patch-based training, mixed precision, and memory optimization are essential
+5. **TorchIO APIs change** — Custom Dataset classes are more portable than Queue-based pipelines
 
 ## Acknowledgments
 
 - Datasets: [Medical Segmentation Decathlon](http://medicaldecathlon.com/), [RSNA](https://www.kaggle.com/c/rsna-pneumonia-detection-challenge)
-- Course: Pierian Data - AI for Medical Imaging
+- Course: Pierian Data - AI for Medical Imaging (modernized for PyTorch 2.0+, Lightning 2.0+, TorchIO 0.21)
 
 ## Author
 
 Christopher Gaughan, PhD  
-https://github.com/christophergaughan
+(https://github.com/christophergaughan)
 
 ---
 
-*Built with PyTorch and PyTorch Lightning on Google Colab.*
+*Built with PyTorch and PyTorch Lightning on Google Colab (A100 GPU).*
