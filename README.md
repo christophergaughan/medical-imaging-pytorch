@@ -152,7 +152,7 @@ pip install torch torchvision pytorch-lightning torchio nibabel pydicom albument
 ## Acknowledgments
 
 - Datasets: [Medical Segmentation Decathlon](http://medicaldecathlon.com/), [RSNA](https://www.kaggle.com/c/rsna-pneumonia-detection-challenge)
-- Course: Pierian Data - AI for Medical Imaging (modernized for PyTorch 2.0+, Lightning 2.0+, TorchIO 0.21)
+- Course: Pierian Data - AI for Medical Imaging (but greatly retoucheed and modernized for PyTorch 2.0+, Lightning 2.0+, TorchIO 0.21, plus we perfomed analyses on **full data volume** for RSNA-pneumona competition from `Kaggle`)
 
 ## Author
 
